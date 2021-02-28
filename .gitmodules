@@ -1,0 +1,3 @@
+[submodule "pyoxenmq"]
+	path = pyoxenmq
+	url = https://github.com/oxen-io/loki-pylokimq
