@@ -40,7 +40,7 @@ def scores():
             cur.execute("SELECT SUM(shares), SUM(score) FROM aggregate_shares")
             total_shares, total_score = cur.fetchone()
             cur.execute("SELECT COUNT(*) FROM snapshots")
-            snapshots = cur.fetchone()
+            snapshots = cur.fetchone()[0]
             cur.execute("SELECT address, shares, score FROM aggregate_shares JOIN wallets ON wallet = wallets.id")
             for row in cur:
                 wallets[row[0]] = {'shares': daily_shares(row[1]), 'score': pinball(row[2])}
