@@ -19,14 +19,14 @@ def pinball(score):
     Convert a database score number (which is 1.0, 1.2, or 1.4 per snapshot per full SN stake) into
     a "pinball" score, which is 1000.0 per day per full SN (or 1200 or 1400 for bonus).
     """
-    return score * 1000 / 24  # 1000 points per day, 24 snapshots per day
+    return None if score is None else score * 1000 / 24  # 1000 points per day, 24 snapshots per day
 
 
 def daily_shares(shares):
     """
     Converts a raw # of shares value (which is 1 per snapshot per full SN, thus 24/day) into a daily value
     """
-    return shares / 24
+    return None if shares is None else shares / 24
 
 
 @app.route('/scores')
