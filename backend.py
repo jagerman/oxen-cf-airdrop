@@ -29,7 +29,7 @@ def daily_shares(shares):
     return shares / 24
 
 
-@app.route('/scores.json')
+@app.route('/scores')
 def scores():
     wallets = {}
     snapshots = 0
@@ -53,7 +53,7 @@ def scores():
     })
 
 
-@app.route('/snapshots.json')
+@app.route('/snapshots')
 def snapshots():
     snapshots = []
     with psql:
@@ -75,7 +75,7 @@ def snapshots():
     return flask.jsonify({ 'snapshots': snapshots })
 
 
-@app.route('/scores/<wallet>.json')
+@app.route('/scores/<wallet>')
 def wallet_score(wallet):
     snapshots = []
     with psql:
