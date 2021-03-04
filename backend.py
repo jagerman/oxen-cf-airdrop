@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import flask
+from flask_cors import CORS
 import json
 import psycopg2
 import requests
@@ -12,6 +13,7 @@ import traceback
 
 psql = psycopg2.connect(**config.pgsql_connect_opts)
 app = flask.Flask(__name__)
+CORS(app)
 
 
 def pinball(score):
