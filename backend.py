@@ -64,7 +64,7 @@ def snapshots():
                 SELECT height, blockhash, date,
                     (SELECT COUNT(*) FROM wallet_snapshot_shares WHERE wallet_snapshot_shares.height = snapshots.height) AS wallets
                 FROM snapshots
-                ORDER BY height
+                ORDER BY height DESC
                 """)
             for row in cur:
                 snapshots.append({
@@ -85,6 +85,7 @@ def wallet_score(wallet):
             cur.execute("""
                 SELECT height, shares, score FROM wallet_shares
                 WHERE wallet = (SELECT id FROM wallets WHERE address = %s)
+                ORDER BY height DESC
                 """,
                 (wallet,)
             )
