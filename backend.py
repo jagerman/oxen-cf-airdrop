@@ -43,9 +43,9 @@ def scores():
             total_shares, total_score = cur.fetchone()
             cur.execute("SELECT COUNT(*) FROM snapshots")
             snapshots = cur.fetchone()[0]
-            cur.execute("SELECT address, shares, score FROM aggregate_shares JOIN wallets ON wallet = wallets.id")
+            cur.execute("SELECT address, shares, score, snapshots FROM aggregate_shares JOIN wallets ON wallet = wallets.id")
             for row in cur:
-                wallets[row[0]] = {'shares': daily_shares(row[1]), 'score': pinball(row[2])}
+                wallets[row[0]] = {'shares': daily_shares(row[1]), 'score': pinball(row[2]), 'snapshots': row[3]}
 
     return flask.jsonify({
         'wallets': wallets,
