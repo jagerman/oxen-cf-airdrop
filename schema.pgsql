@@ -61,12 +61,12 @@ CREATE VIEW public.wallet_shares AS
 --
 
 CREATE MATERIALIZED VIEW public.aggregate_shares AS
- SELECT wallet_shares.wallet,
-    count(*) AS snapshots,
-    sum(wallet_shares.shares) AS shares,
-    sum(wallet_shares.score) AS score
-   FROM public.wallet_shares
-  GROUP BY wallet_shares.wallet
+ SELECT wallets.id AS wallet,
+    count(wallet_shares.wallet) AS snapshots,
+    coalesce(sum(wallet_shares.shares), 0.0) AS shares,
+    coalesce(sum(wallet_shares.score), 0.0) AS score
+   FROM wallets LEFT JOIN wallet_shares ON wallet_shares.wallet = wallets.id
+  GROUP BY wallets.id
   WITH NO DATA;
 
 
