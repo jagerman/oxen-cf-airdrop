@@ -169,6 +169,7 @@ def register_wallet():
                     ON CONFLICT (address) DO UPDATE SET destination = %(dest)s, signature = %(sig)s
                     """,
                     { 'addr': req['address'], 'dest': req['destination'], 'sig': req['signature'] })
+                cur.execute("REFRESH MATERIALIZED VIEW aggregate_shares")
 
         return flask.jsonify({ 'result': { 'added': True } })
     except KeyError as e:
