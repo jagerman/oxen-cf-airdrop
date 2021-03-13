@@ -93,7 +93,7 @@ def wallet_score(wallet):
             row = cur.fetchone()
             if row:
                 return flask.jsonify({ 'shares': daily_shares(row[0]), 'score': pinball(row[1]), 'snapshots': row[2] })
-    return flask.jsonify({ 'error': 'Wallet not found' })
+    flask.abort(404)
 
 
 @app.route('/scores/<wallet>')
@@ -101,16 +101,13 @@ def wallet_scores(wallet):
     snapshots = []
     with psql:
         with psql.cursor() as cur:
-            cur.execute("""
-                SELECT height, shares, score FROM wallet_shares
-                WHERE wallet = (
-                    SELECT id FROM wallets WHERE
-                        address = %(wallet)s OR lower(destination) = lower(%(wallet)s)
-                    LIMIT 1)
-                ORDER BY height DESC
-                """,
-                {'wallet': wallet}
-            )
+            cur.execute("SELECT id FROM wallets WHERE address = %(wallet)s OR lower(destination) = lower(%(wallet)s)",
+                    {'wallet': wallet})
+            row = cur.fetchone()
+            if not row:
+                flask.abort(404)
+
+            cur.execute("SELECT height, shares, score FROM wallet_shares WHERE wallet = %s ORDER BY height DESC", row)
             for row in cur:
                 snapshots.append({'height': row[0], 'shares': daily_shares(row[1]), 'score': pinball(row[2])})
 
