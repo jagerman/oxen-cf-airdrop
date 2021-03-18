@@ -82,16 +82,15 @@ def wallet_score(wallet):
     with psql:
         with psql.cursor() as cur:
             cur.execute("""
-                SELECT shares, score, snapshots FROM aggregate_shares
-                WHERE wallet = (
+                SELECT SUM(shares), SUM(score), MAX(snapshots) FROM aggregate_shares
+                WHERE wallet IN (
                     SELECT id FROM wallets WHERE
-                        address = %(wallet)s OR lower(destination) = lower(%(wallet)s)
-                    LIMIT 1)
+                        address = %(wallet)s OR lower(destination) = lower(%(wallet)s))
                 """,
                 {'wallet': wallet}
             )
             row = cur.fetchone()
-            if row:
+            if row and row[0] is not None:
                 return flask.jsonify({ 'shares': daily_shares(row[0]), 'score': pinball(row[1]), 'snapshots': row[2] })
     flask.abort(404)
 
@@ -103,11 +102,13 @@ def wallet_scores(wallet):
         with psql.cursor() as cur:
             cur.execute("SELECT id FROM wallets WHERE address = %(wallet)s OR lower(destination) = lower(%(wallet)s)",
                     {'wallet': wallet})
-            row = cur.fetchone()
-            if not row:
+            wids = [row[0] for row in cur]
+            if not wids:
                 flask.abort(404)
 
-            cur.execute("SELECT height, shares, score FROM wallet_shares WHERE wallet = %s ORDER BY height DESC", row)
+            cur.execute("SELECT height, shares, score FROM wallet_shares WHERE wallet IN (" +
+                    ",".join("%s" for _ in wids) + ") ORDER BY height DESC", wids)
+
             for row in cur:
                 snapshots.append({'height': row[0], 'shares': daily_shares(row[1]), 'score': pinball(row[2])})
 
