@@ -95,8 +95,8 @@ def wallet_score(wallet):
     flask.abort(404)
 
 
-@app.route('/scores/<wallet>')
-def wallet_scores(wallet):
+@app.route('/snapshots/<wallet>')
+def wallet_snapshots(wallet):
     snapshots = []
     with psql:
         with psql.cursor() as cur:
