@@ -45,7 +45,11 @@ def scores():
             snapshots = cur.fetchone()[0]
             cur.execute("SELECT address, shares, score, snapshots FROM aggregate_shares JOIN wallets ON wallet = wallets.id")
             for row in cur:
-                wallets[row[0]] = {'shares': daily_shares(row[1]), 'score': pinball(row[2]), 'snapshots': row[3]}
+                wallets[row[0]] = {
+                        #'shares': daily_shares(row[1]),
+                        'shares': row[2] / total_score * 100,  # Hack for current front-end
+                        'score': pinball(row[2]),
+                        'snapshots': row[3]}
 
     return flask.jsonify({
         'wallets': wallets,
@@ -81,6 +85,8 @@ def snapshots():
 def wallet_score(wallet):
     with psql:
         with psql.cursor() as cur:
+            cur.execute("SELECT SUM(score) FROM aggregate_shares")
+            total_score = cur.fetchone()[0]
             cur.execute("""
                 SELECT SUM(shares), SUM(score), MAX(snapshots) FROM aggregate_shares
                 WHERE wallet IN (
@@ -91,7 +97,11 @@ def wallet_score(wallet):
             )
             row = cur.fetchone()
             if row and row[0] is not None:
-                return flask.jsonify({ 'shares': daily_shares(row[0]), 'score': pinball(row[1]), 'snapshots': row[2] })
+                return flask.jsonify({
+                    #'shares': daily_shares(row[0]),
+                    'shares': row[1] / total_score * 100,  # Hack for current front-end
+                    'score': pinball(row[1]),
+                    'snapshots': row[2] })
     flask.abort(404)
 
 
