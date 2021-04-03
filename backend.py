@@ -81,6 +81,28 @@ def snapshots():
     return flask.jsonify({ 'snapshots': snapshots })
 
 
+@app.route('/snapshot/<int:height>')
+def single_snapshot(height):
+    with psql:
+        with psql.cursor() as cur:
+            cur.execute("SELECT blockhash, date FROM snapshots WHERE height = %s", (height,))
+            row = cur.fetchone()
+            if not row:
+                flask.abort(404)
+            cur.execute("""
+                SELECT address, shares
+                FROM wallet_snapshot_shares JOIN wallets ON wallet = wallets.id
+                WHERE height = %s
+                """,
+                (height,))
+
+            return flask.jsonify({
+                'hash': row[0],
+                'timestamp': row[1].astimezone(timezone.utc).isoformat(),
+                'sn_count' : { r[0]: r[1] for r in cur }
+            })
+
+
 @app.route('/score/<wallet>')
 def wallet_score(wallet):
     with psql:
